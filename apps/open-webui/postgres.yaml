@@ -1,0 +1,28 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: owui-pg
+  namespace: open-webui
+spec:
+  instances: 1
+  imageName: ghcr.io/zaclovespenguins/cnpg-pgvector:17
+
+  bootstrap:
+    initdb:
+      database: openwebui
+      owner: openwebui
+      postInitApplicationSQL:
+        - CREATE EXTENSION IF NOT EXISTS vector;
+
+  storage:
+    size: 20Gi
+    storageClass: local-path
+
+  resources:
+    requests: { memory: "512Mi", cpu: "250m" }
+    limits:   { memory: "2Gi" }
+
+  postgresql:
+    parameters:
+      shared_buffers: "256MB"
+      max_connections: "100"
