@@ -4,6 +4,7 @@ metadata:
   name: open-webui
   namespace: open-webui
 spec:
+  type: LoadBalancer
   selector: { app: open-webui }
   ports:
     - port: 80
