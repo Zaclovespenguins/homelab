@@ -1,0 +1,158 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arr-stack
+  namespace: arr-stack
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels: { app: arr-stack }
+  template:
+    metadata:
+      labels: { app: arr-stack }
+    spec:
+      # all containers share the pod network namespace,
+      # replicating compose's `network_mode: service:vpn`
+      containers:
+        - name: gluetun
+          image: qmcgaw/gluetun:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            capabilities:
+              add: [NET_ADMIN]
+          envFrom:
+            - configMapRef: { name: arr-common-env }
+          env:
+            - name: WIREGUARD_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef: { name: gluetun-secrets, key: WIREGUARD_PRIVATE_KEY }
+          startupProbe:
+            httpGet: { path: /v1/publicip/ip, port: 9999 }
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: { path: /v1/publicip/ip, port: 9999 }
+            periodSeconds: 30
+          resources:
+            requests: { memory: "64Mi", cpu: "50m" }
+            limits:   { memory: "256Mi" }
+
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WEBUI_PORT
+              value: "8489"
+          envFrom:
+            - configMapRef: { name: arr-common-env }
+          volumeMounts:
+            - name: qbittorrent-config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+          startupProbe:
+            tcpSocket: { port: 8489 }
+            periodSeconds: 10
+            failureThreshold: 60
+
+        - name: prowlarr
+          image: lscr.io/linuxserver/prowlarr:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: { name: arr-common-env }
+          volumeMounts:
+            - name: prowlarr-config
+              mountPath: /config
+          startupProbe:
+            httpGet: { path: /ping, port: 9696 }
+            periodSeconds: 10
+            failureThreshold: 60
+
+        - name: sonarr
+          image: lscr.io/linuxserver/sonarr:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: { name: arr-common-env }
+          volumeMounts:
+            - name: sonarr-config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+            # NFS day: uncomment once media export exists (RWX PV)
+            # - name: media
+            #   mountPath: /data
+          startupProbe:
+            httpGet: { path: /ping, port: 8989 }
+            periodSeconds: 10
+            failureThreshold: 60
+
+        - name: radarr
+          image: lscr.io/linuxserver/radarr:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: { name: arr-common-env }
+          volumeMounts:
+            - name: radarr-config
+              mountPath: /config
+            - name: downloads
+              mountPath: /downloads
+            # - name: media
+            #   mountPath: /data
+          startupProbe:
+            httpGet: { path: /ping, port: 7878 }
+            periodSeconds: 10
+            failureThreshold: 60
+
+        - name: bazarr
+          image: lscr.io/linuxserver/bazarr:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: { name: arr-common-env }
+          env:
+            - name: UMASK_SET
+              value: "022"
+          volumeMounts:
+            - name: bazarr-config
+              mountPath: /config
+            # - name: media
+            #   mountPath: /data
+          startupProbe:
+            tcpSocket: { port: 6767 }
+            periodSeconds: 10
+            failureThreshold: 60
+
+        - name: mylar
+          image: lscr.io/linuxserver/mylar3:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef: { name: arr-common-env }
+          volumeMounts:
+            - name: mylar-config
+              mountPath: /config
+            # - name: media
+            #   mountPath: /data
+          startupProbe:
+            tcpSocket: { port: 8090 }
+            periodSeconds: 10
+            failureThreshold: 60
+
+      volumes:
+        - name: qbittorrent-config
+          persistentVolumeClaim: { claimName: qbittorrent-config }
+        - name: prowlarr-config
+          persistentVolumeClaim: { claimName: prowlarr-config }
+        - name: sonarr-config
+          persistentVolumeClaim: { claimName: sonarr-config }
+        - name: radarr-config
+          persistentVolumeClaim: { claimName: radarr-config }
+        - name: bazarr-config
+          persistentVolumeClaim: { claimName: bazarr-config }
+        - name: mylar-config
+          persistentVolumeClaim: { claimName: mylar-config }
+        - name: downloads
+          persistentVolumeClaim: { claimName: downloads }
+        # NFS day: add RWX PV + this volume
+        # - name: media
+        #   persistentVolumeClaim: { claimName: media-nfs }

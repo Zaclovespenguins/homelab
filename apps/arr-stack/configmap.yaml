@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: arr-common-env
+  namespace: arr-stack
+data:
+  TZ: America/Denver
+  PUID: "1000"
+  PGID: "1000"
+  # gluetun-specific (ignored by the other containers)
+  VPN_SERVICE_PROVIDER: protonvpn
+  VPN_TYPE: wireguard
+  SERVER_COUNTRIES: United States
+  VPN_PORT_FORWARDING: "on"
+  PORT_FORWARD_ONLY: "on"
