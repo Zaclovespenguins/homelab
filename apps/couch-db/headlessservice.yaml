@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb-headless
+  namespace: couchdb
+  labels:
+    app: couchdb
+spec:
+  clusterIP: None
+  selector:
+    app: couchdb
+  ports:
+    - name: couchdb
+      port: 5984
+      targetPort: 5984
