@@ -1,0 +1,49 @@
+services:
+  composeflux:
+    image: ghcr.io/veerendra2/composeflux:latest
+    container_name: composeflux
+    restart: unless-stopped
+
+    environment:
+      # Git Configuration
+      GIT_REPO_URL: ${GIT_REPO_URL}
+      STACK_PATH: ${STACK_PATH}
+      GIT_INTERVAL: 15m              # Sync interval
+      GIT_BRANCH: main
+      # GIT_CLONE_PATH: ${GIT_CLONE_PATH}
+      # GIT_SSH_KEY_PATH: /Users/server/.ssh/composeflux_id_rsa
+
+      # Local Age Encrypted Secrets
+      # AGE_PASSPHRASE: ${AGE_PASSPHRASE}
+
+      # Remote Secrets - Bitwarden
+      # GIT_DEPLOY_KEY_SECRET_REF: ${GIT_DEPLOY_KEY_SECRET_REF}
+      # BITWARDEN_ACCESS_TOKEN: ${BITWARDEN_ACCESS_TOKEN}
+      # BITWARDEN_ORGANIZATION_ID: ${BITWARDEN_ORGANIZATION_ID}
+      # BITWARDEN_PROJECT_ID: ${BITWARDEN_PROJECT_ID}
+
+      # Remote Secrets - Infisical
+      # GIT_DEPLOY_KEY_SECRET_REF: ${GIT_DEPLOY_KEY_SECRET_REF}
+      # INFISICAL_CLIENT_ID: ${INFISICAL_CLIENT_ID}
+      # INFISICAL_CLIENT_SECRET: ${INFISICAL_CLIENT_SECRET}
+      # INFISICAL_ENVIRONMENT: ${INFISICAL_ENVIRONMENT}
+      # INFISICAL_PROJECT_ID: ${INFISICAL_PROJECT_ID}
+      # INFISICAL_SITE_URL: https://app.infisical.com
+
+      # Reconciliation & Pruning
+      # HEALTH_RECONCILE_INTERVAL: 5m  # Proactive health check interval (disabled by default)
+      # PRUNE_INTERVAL: 24h           # Periodic Docker resource prune interval (24h default, 0 to disable)
+
+      # Logging
+      LOG_LEVEL: info
+      LOG_FORMAT: console           # console or json
+
+    volumes:
+      - ~/.orbstack/run/docker.sock:/var/run/docker.sock
+      - ./gitstack:/opt/compose-stack
+
+      # Optional: Custom SSH known_hosts
+      # - ./ssh_known_hosts:/etc/ssh/ssh_known_hosts:ro
+
+      # Optional: Mount local SSH key instead of fetching from secrets manager
+      - ~/.ssh/composeflux_id_rsa:/.ssh/composeflux_id_rsa:ro
