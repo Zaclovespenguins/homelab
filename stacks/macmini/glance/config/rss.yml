@@ -1,4 +1,4 @@
 - type: rss
   title: News
   feeds:
-    - url: ${RSS_URL}
+    - url: https://www.engadget.com/rss.xml
