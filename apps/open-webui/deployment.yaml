@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: open-webui
-          image: ghcr.io/open-webui/open-webui:v0.11.1
+          image: ghcr.io/open-webui/open-webui:v0.11.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -28,8 +28,8 @@ spec:
             - name: PGVECTOR_DB_URL
               valueFrom:
                 secretKeyRef: { name: owui-pg-app, key: uri }
-            - name: OLLAMA_BASE_URL
-              value: http://100.67.130.2:11434
+            # - name: OLLAMA_BASE_URL
+            #   value: http://100.67.130.2:11434
             - name: ENABLE_WEBSOCKET_SUPPORT
               value: "true"
           envFrom:
