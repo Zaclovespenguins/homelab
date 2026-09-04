@@ -1,0 +1,5 @@
+# Common variables available to all stacks
+envs:
+  DOMAIN: homeserver.local
+  TZ: America/New_York
+  ENVIRONMENT: production
