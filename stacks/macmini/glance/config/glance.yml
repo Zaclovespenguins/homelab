@@ -1,12 +1,27 @@
-server:
-  assets-path: /app/assets
+# server:
+#   assets-path: /app/assets
 
-theme:
-  # Note: assets are cached by the browser, changes to the CSS file
-  # will not be reflected until the browser cache is cleared (Ctrl+F5)
-  custom-css-file: /assets/user.css
+# theme:
+#   # Note: assets are cached by the browser, changes to the CSS file
+#   # will not be reflected until the browser cache is cleared (Ctrl+F5)
+#   custom-css-file: /assets/user.css
 
+# pages:
+#   # It's not necessary to create a new file for each page and include it, you can simply
+#   # put its contents here, though multiple pages are easier to manage when separated
+#   - $include: home.yml
 pages:
-  # It's not necessary to create a new file for each page and include it, you can simply
-  # put its contents here, though multiple pages are easier to manage when separated
-  - $include: home.yml
+  - name: Home
+    columns:
+      - size: full
+        widgets:
+          - $include: rss.yml
+  - name: News
+    columns:
+      - size: full
+        widgets:
+          - type: group
+            widgets:
+              - $include: rss.yml
+              - type: reddit
+                subreddit: news
