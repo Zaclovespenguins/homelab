@@ -1,0 +1,4 @@
+- type: rss
+  title: News
+  feeds:
+    - url: ${RSS_URL}
